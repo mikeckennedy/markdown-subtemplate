@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.idea/$CACHE_FILE$
+.idea/markdown-subtemplate.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/dictionaries/mkennedy.xml
+.idea/inspectionProfiles/profiles_settings.xml
