@@ -13,6 +13,18 @@ def read(filename):
         return re.sub(text_type(r':[a-z]+:`~?(.*?)`'), text_type(r'``\1``'), fd.read())
 
 
+requirements_txt = os.path.join(
+    os.path.dirname(__file__),
+    'requirements.txt'
+)
+
+with open(requirements_txt, 'r', encoding='utf-8') as fin:
+    requires = [
+        line.strip()
+        for line in fin
+        if line and line.strip()
+    ]
+
 setup(
     name="markdown_subtemplate",
     version="0.1.0",
@@ -23,21 +35,17 @@ setup(
     author_email="michael@talkpython.fm",
 
     description="A template engine to render Markdown with external template imports and variable replacements.",
-    long_description=read("README.rst"),
+    long_description=read("README.md"),
 
     packages=find_packages(exclude=('tests',)),
 
-    install_requires=[],
+    install_requires=requires,
 
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
