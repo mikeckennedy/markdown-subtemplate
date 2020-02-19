@@ -1,0 +1,2 @@
+class MarkdownTemplateException(Exception):
+    pass
