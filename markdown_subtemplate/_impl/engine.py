@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from markdown_subtemplate.exceptions import MarkdownTemplateException
+from .exceptions import MarkdownTemplateException
 
 __template_folder: Optional[str] = None
 
