@@ -1,4 +1,4 @@
-# markdown-subtemplate project
+# markdown-subtemplate [![](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-3610/) [![](https://raw.githubusercontent.com/mikeckennedy/markdown-subtemplate/master/readme_resources/mitlicense.svg)](https://github.com/mikeckennedy/markdown-subtemplate/blob/master/LICENSE)
 
 A template engine to render Markdown with external template imports and basic variable replacements.
 
@@ -6,7 +6,7 @@ A template engine to render Markdown with external template imports and basic va
 
 We often make a choice between data-driven server apps (typical Flask app), CMSes that let us edit content on the web such as WordPress, and even flat file systems like Pelican.
 
-These are presented as an either-or. You either get a full database driven app or you get a CMS, but not both. This project is meant to help add CMS like features to your data-driven web apps and even use static files.
+These are presented as an either-or. You either get a full database driven app or you get a CMS, but not both. This project is meant to help add CMS like features to your data-driven web apps and even author them as static markdown files.
 
 Here's how it works:
 
@@ -63,7 +63,7 @@ def landing(request):
     }
 ```
 
-And the template grabs the content and renders it:
+And the larger website template grabs the content and renders it, `landing.pt`:
 
 ```html
 ...
