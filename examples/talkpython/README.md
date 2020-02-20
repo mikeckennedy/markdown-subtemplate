@@ -8,7 +8,7 @@ We have lots of sections on our landing pages that are repeated. Hence the abili
 
 The sections from **What's this course about and how is it different?** to **The time to act is now** are generated with content similar to below.
 
-## 100-days-of-web.md (top level page)
+## 100-web.md (top level page)
 
 ```markdown
 ## What's this course about and how is it different?
@@ -86,7 +86,7 @@ to help you find just the right lecture.
 The template contents are show in the larger context of the site via:
 
 ```html
-... main contents, nav, etc. ...
+... explore_course.pt:[]() main contents, nav, etc. ...
 <div>
     ${structure:contents}
 </div>
@@ -96,7 +96,7 @@ These templates are rendered with `markdown_subtemplate` using this code:
 
 ```python
 # contents returned as part of the model/dictionary from Pyramid.
-contents = markdown_subtemplate.engine.get_page(template_path, {})
+contents = markdown_subtemplate.engine.get_page('100-web.md', {})
 ```
 
 ## Other details
