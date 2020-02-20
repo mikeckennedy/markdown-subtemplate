@@ -23,4 +23,8 @@ class SubtemplateCache(abc.ABC):
     def clear(self):
         pass
 
+    @abc.abstractmethod
+    def count(self) -> int:
+        pass
+
 

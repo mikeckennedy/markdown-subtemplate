@@ -1,7 +1,7 @@
 import hashlib
 
 import markdown2
-from ..caching import cache
+from .. import caching as __caching
 
 # Note: Do NOT enable link-patterns, it causes a crash.
 __enabled_markdown_extras = [
@@ -18,6 +18,7 @@ def transform(text, safe_mode=True):
 
     hash_val = get_hash(text)
 
+    cache = __caching.get_cache()
     if entry := cache.get_html(hash_val):
         return entry.contents
 

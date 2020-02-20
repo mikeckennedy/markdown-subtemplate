@@ -3,13 +3,14 @@ from typing import Optional, Any, Dict
 
 from .infrastructure import page as __page
 from . import logging as __logging
+from . import caching as __caching
 
 __template_folder: Optional[str] = None
 
 
 def set_template_folder(full_path: str):
     from .exceptions import PathException
-    log = __logging.log
+    log = __logging.get_log()
 
     global __template_folder
 
@@ -49,10 +50,11 @@ def get_page(template_path: str, data: Dict[str, Any] = {}) -> str:
 
 
 def clear_cache(reclaim_all_memory=False):
-    log = __logging.log
+    log = __logging.get_log()
     log.info(f"engine.clear_cache: Cache cleared, reclaim_all_memory={reclaim_all_memory}.")
 
-    __page.clear_cache(reclaim_all_memory)
+    cache = __caching.get_cache()
+    cache.clear()
 
 
 def clear_template_folder():

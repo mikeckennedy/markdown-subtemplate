@@ -29,3 +29,6 @@ class MemoryCache(SubtemplateCache):
     def clear(self):
         self.markdown_cache.clear()
         self.html_cache.clear()
+
+    def count(self) -> int:
+        return len(self.markdown_cache) + len(self.html_cache)

@@ -3,12 +3,16 @@ from .memory_cache import MemoryCache
 from .subtemplate_cache import SubtemplateCache
 from ..exceptions import ArgumentExpectedException
 
-cache: SubtemplateCache = MemoryCache()
+__cache: SubtemplateCache = MemoryCache()
 
 
 def set_cache(cache_instance: SubtemplateCache):
-    global cache
+    global __cache
     if not cache_instance or not isinstance(cache_instance, SubtemplateCache):
         raise ArgumentExpectedException('cache_instance')
 
-    cache = cache_instance
+    __cache = cache_instance
+
+
+def get_cache() -> SubtemplateCache:
+    return __cache

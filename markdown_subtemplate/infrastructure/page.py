@@ -2,20 +2,18 @@ import os
 import datetime
 from typing import Dict, Optional, Any, List
 
-from markdown_subtemplate.caching import cache
+from markdown_subtemplate import caching as __caching
 from markdown_subtemplate.infrastructure import markdown_transformer
 from markdown_subtemplate.exceptions import ArgumentExpectedException, TemplateNotFoundException
 from markdown_subtemplate import logging as __logging
-
-# __cache_markdown: Dict[str, CacheEntry] = {}
-# __cache_html: Dict[str, CacheEntry] = {}
 
 template_folder: Optional[str] = None
 
 
 # noinspection DuplicatedCode
 def get_page(template_path: str, data: Dict[str, Any]) -> str:
-    log = __logging.log
+    cache = __caching.get_cache()
+    log = __logging.get_log()
 
     key = f'name: {template_path}, data: {data}'
     if entry := cache.get_html(key):
@@ -44,7 +42,8 @@ def get_html(markdown_text: str, unsafe_data=False) -> str:
 
 
 def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
-    log = __logging.log
+    cache = __caching.get_cache()
+    log = __logging.get_log()
 
     key = f'name: {template_path}, data: {data}'
     if entry := cache.get_markdown(key):
@@ -65,7 +64,7 @@ def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
 
 
 def load_markdown_contents(template_path: str, data: Dict[str, Any]) -> str:
-    log = __logging.log
+    log = __logging.get_log()
     log.verbose(f"Loading markdown template: {template_path}")
 
     landing_md = get_page_markdown(template_path)
@@ -123,7 +122,7 @@ def get_shared_markdown(import_name: str) -> Optional[str]:
 
 
 def process_imports(lines: List[str]) -> List[str]:
-    log = __logging.log
+    log = __logging.get_log()
     line_data = list(lines)
 
     for idx, line in enumerate(line_data):
@@ -149,7 +148,7 @@ def process_imports(lines: List[str]) -> List[str]:
 
 
 def process_variables(lines: List[str], data: Dict[str, Any]) -> List[str]:
-    log = __logging.log
+    log = __logging.get_log()
 
     line_data = list(lines)
     keys = list(data.keys())
