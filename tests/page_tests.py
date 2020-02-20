@@ -5,7 +5,7 @@ import pytest
 from markdown_subtemplate import exceptions
 from markdown_subtemplate import engine
 # noinspection PyProtectedMember
-from markdown_subtemplate._impl import page
+from markdown_subtemplate import page
 
 template_folder = os.path.join(os.path.dirname(__file__), 'templates')
 engine.set_template_folder(template_folder)
