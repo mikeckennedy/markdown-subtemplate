@@ -133,6 +133,26 @@ And a footer:
 
 The resulting markdown is just replacing the `IMPORT` statements with the contents of those files, then passing the whole thing through a markdown to HTML processor.
 
+## Variables
+
+`markdown_subtemplate` has some limited support for variable replacements. Given this markdown page:
+
+```markdown
+# Example: $TITLE$
+
+Welcome to the $NAME$ project. Here are some details 
+...
+```
+
+You can populate the variable values with:
+
+```python
+data = {'title': 'Markdown Transformers', 'project': 'sub templates'}
+contents = engine.get_page('page.md', data)
+```
+
+Note that the variable names must be all-caps in the template. Missing variable statements in markdown that appear in the data dictionary are ignored.
+
 ## Requirements
 
 This library requires **Python 3.6 or higher**. Because, *f-yes*! (f-strings).
