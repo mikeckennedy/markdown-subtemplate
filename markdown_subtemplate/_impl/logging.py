@@ -88,5 +88,5 @@ class NullLogger(SubtemplateLogger):
         pass
 
 
-log: SubtemplateLogger = NullLogger()
+# log: SubtemplateLogger = NullLogger()
 log: SubtemplateLogger = StdOutLogger(LogLevel.info)
