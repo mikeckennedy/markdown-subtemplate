@@ -92,7 +92,7 @@ def get_page_markdown(template_path: str) -> Optional[str]:
     file_name = os.path.basename(template_path)
     file_parts = os.path.dirname(template_path).split(os.path.sep)
     folder = get_folder(file_parts)
-    full_file = os.path.join(folder, file_name)
+    full_file = os.path.join(folder, file_name).lower()
 
     if not os.path.exists(full_file):
         raise TemplateNotFoundException(full_file)
