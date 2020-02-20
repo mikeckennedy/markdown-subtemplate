@@ -38,7 +38,7 @@ def set_template_folder(full_path: str):
 
 def get_page(template_path: str, data: Dict[str, Any] = {}) -> str:
     from markdown_subtemplate.exceptions import InvalidOperationException
-    log = __logging.log
+    log = __logging.get_log()
 
     if not __template_folder:
         msg = "Template folder not set, call engine.set_template_folder() first."

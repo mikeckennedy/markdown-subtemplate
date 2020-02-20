@@ -25,4 +25,4 @@ def test_init_folder_success():
 
 
 def test_clear_cache():
-    caching.cache.clear()
+    caching.get_cache().clear()
