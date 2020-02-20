@@ -3,8 +3,9 @@ from collections import namedtuple
 import datetime
 from typing import Dict, Optional, Any, List
 
-from markdown_subtemplate._impl import markdown_transformer
-from markdown_subtemplate._impl.exceptions import ArgumentExpectedException, TemplateNotFoundException
+from . import markdown_transformer
+from .exceptions import ArgumentExpectedException, TemplateNotFoundException
+from . import logging as __logging
 
 CacheEntry = namedtuple("CacheEntry", "name, data, created, contents")
 __cache_markdown: Dict[str, CacheEntry] = {}
@@ -13,11 +14,17 @@ __cache_html: Dict[str, CacheEntry] = {}
 template_folder: Optional[str] = None
 
 
+# noinspection DuplicatedCode
 def get_page(template_path: str, data: Dict[str, Any]) -> str:
+    log = __logging.log
+
     key = f'name: {template_path}, data: {data}'
     if key in __cache_html:
+        log.trace(f"CACHE HIT: Reusing {template_path} from HTML cache.")
         entry: CacheEntry = __cache_html[key]
         return entry.contents
+
+    t0 = datetime.datetime.now()
 
     # Get the markdown with imports and substitutions
     markdown = get_markdown(template_path, data)
@@ -27,6 +34,11 @@ def get_page(template_path: str, data: Dict[str, Any]) -> str:
     entry = CacheEntry(f"{template_path}:{key}", str(data), datetime.datetime.now(), html)
     __cache_html[key] = entry
 
+    dt = datetime.datetime.now() - t0
+
+    msg = f"Created contents for {template_path}:{data} in {int(dt.total_seconds() * 1000):,} ms."
+    log.info(f"GENERATING HTML: {msg}")
+
     return html
 
 
@@ -35,8 +47,11 @@ def get_html(markdown_text: str, unsafe_data=False) -> str:
 
 
 def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
+    log = __logging.log
+
     key = f'name: {template_path}, data: {data}'
     if key in __cache_markdown:
+        log.trace(f"CACHE HIT: Reusing {template_path} from MARKDOWN cache.")
         entry: CacheEntry = __cache_markdown[key]
         return entry.contents
 
@@ -48,12 +63,17 @@ def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
     __cache_markdown[key] = entry
 
     dt = datetime.datetime.now() - t0
-    print(f"Created contents for {template_path}:{data} in {int(dt.total_seconds() * 1000):,} ms.")
+
+    msg = f"Created contents for {template_path}:{data} in {int(dt.total_seconds() * 1000):,} ms."
+    log.info(f"GENERATING MARKDOWN: {msg}")
 
     return text
 
 
 def load_markdown_contents(template_path: str, data: Dict[str, Any]) -> str:
+    log = __logging.log
+    log.verbose(f"Loading markdown template: {template_path}")
+
     landing_md = get_page_markdown(template_path)
 
     lines = landing_md.split('\n')
@@ -109,6 +129,7 @@ def get_shared_markdown(import_name: str) -> Optional[str]:
 
 
 def process_imports(lines: List[str]) -> List[str]:
+    log = __logging.log
     line_data = list(lines)
 
     for idx, line in enumerate(line_data):
@@ -121,7 +142,10 @@ def process_imports(lines: List[str]) -> List[str]:
             .replace(']', '') \
             .strip()
 
-        markdown = get_page_markdown(os.path.join('_shared', import_name + '.md'))
+        imported_file = os.path.join('_shared', import_name + '.md')
+        log.verbose(f"Loading import: {imported_file}...")
+
+        markdown = get_page_markdown(imported_file)
         markdown_lines = markdown.split('\n')
         line_data = line_data[:idx] + markdown_lines + line_data[idx + 1:]
 
@@ -131,6 +155,8 @@ def process_imports(lines: List[str]) -> List[str]:
 
 
 def process_variables(lines: List[str], data: Dict[str, Any]) -> List[str]:
+    log = __logging.log
+
     line_data = list(lines)
     keys = list(data.keys())
     key_placeholders = {
@@ -144,10 +170,8 @@ def process_variables(lines: List[str], data: Dict[str, Any]) -> List[str]:
             if key_placeholders[key] not in line:
                 continue
 
-            # print(f"Replacing {key_placeholders[key]} in:\n{line}")
+            log.verbose(f"Replacing {key_placeholders[key]} in:\n{line}")
             line_data[idx] = line.replace(key_placeholders[key], str(data[key]))
-            # print(line_data[idx])
-            # print()
 
     return line_data
 

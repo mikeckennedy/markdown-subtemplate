@@ -9,5 +9,6 @@ __all__ = []
 
 from ._impl import engine
 from ._impl import exceptions
+from ._impl import logging
 # from ._impl import markdown_transformer
 # from ._impl import page
