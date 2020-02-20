@@ -16,7 +16,8 @@ def get_page(template_path: str, data: Dict[str, Any]) -> str:
     log = __logging.get_log()
 
     key = f'name: {template_path}, data: {data}'
-    if entry := cache.get_html(key):
+    entry = cache.get_html(key)
+    if entry:
         log.trace(f"CACHE HIT: Reusing {template_path} from HTML cache.")
         return entry.contents
 
@@ -41,12 +42,14 @@ def get_html(markdown_text: str, unsafe_data=False) -> str:
     return markdown_transformer.transform(markdown_text, unsafe_data)
 
 
+# noinspection DuplicatedCode
 def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
     cache = __caching.get_cache()
     log = __logging.get_log()
 
     key = f'name: {template_path}, data: {data}'
-    if entry := cache.get_markdown(key):
+    entry = cache.get_markdown(key)
+    if entry:
         log.trace(f"CACHE HIT: Reusing {template_path} from MARKDOWN cache.")
         return entry.contents
 

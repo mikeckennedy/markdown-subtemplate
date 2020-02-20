@@ -19,7 +19,8 @@ def transform(text, safe_mode=True):
     hash_val = get_hash(text)
 
     cache = __caching.get_cache()
-    if entry := cache.get_html(hash_val):
+    entry = cache.get_html(hash_val)
+    if entry:
         return entry.contents
 
     html = markdown2.markdown(text, extras=__enabled_markdown_extras, safe_mode=safe_mode)
