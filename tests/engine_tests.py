@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from markdown_subtemplate import engine
+from markdown_subtemplate import engine, caching
 from markdown_subtemplate import exceptions
 
 template_folder = os.path.join(os.path.dirname(__file__), 'templates')
@@ -25,4 +25,4 @@ def test_init_folder_success():
 
 
 def test_clear_cache():
-    engine.clear_cache(True)
+    caching.cache.clear()

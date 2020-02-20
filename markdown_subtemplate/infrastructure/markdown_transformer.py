@@ -1,6 +1,7 @@
 import hashlib
 
 import markdown2
+from ..caching import cache
 
 # Note: Do NOT enable link-patterns, it causes a crash.
 __enabled_markdown_extras = [
@@ -10,8 +11,6 @@ __enabled_markdown_extras = [
     "tables"
 ]
 
-__cache = dict()
-
 
 def transform(text, safe_mode=True):
     if not text:
@@ -19,12 +18,11 @@ def transform(text, safe_mode=True):
 
     hash_val = get_hash(text)
 
-    if hash_val in __cache:
-        return __cache[hash_val]
+    if entry := cache.get_html(hash_val):
+        return entry.contents
 
     html = markdown2.markdown(text, extras=__enabled_markdown_extras, safe_mode=safe_mode)
-
-    __cache[hash_val] = html
+    cache.add_html(hash_val, f"markdown_transformer:{hash_val}", '', html)
 
     return html
 
@@ -35,7 +33,3 @@ def get_hash(text):
     md5.update(data)
 
     return md5.hexdigest()
-
-
-def clear_cache():
-    __cache.clear()

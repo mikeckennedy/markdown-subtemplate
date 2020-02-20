@@ -5,7 +5,7 @@ import pytest
 from markdown_subtemplate import exceptions
 from markdown_subtemplate import engine
 # noinspection PyProtectedMember
-from markdown_subtemplate import page
+from markdown_subtemplate.infrastructure import page
 
 template_folder = os.path.join(os.path.dirname(__file__), 'templates')
 engine.set_template_folder(template_folder)
@@ -46,6 +46,7 @@ We have a paragraph with [a link](https://talkpython.fm).
 def test_basic_markdown_html():
     template = os.path.join('home', 'basic_markdown.md')
     html = engine.get_page(template, {'a': 1, 'b': 2})
+    print("HTML", html)
 
     text = '''
 <h1>This is the basic title</h1>

@@ -1,7 +1,7 @@
 import os
 from typing import Optional, Any, Dict
 
-from . import page as __page
+from .infrastructure import page as __page
 from . import logging as __logging
 
 __template_folder: Optional[str] = None

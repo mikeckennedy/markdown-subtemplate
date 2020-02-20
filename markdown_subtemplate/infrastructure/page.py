@@ -1,15 +1,14 @@
 import os
-from collections import namedtuple
 import datetime
 from typing import Dict, Optional, Any, List
 
-from . import markdown_transformer
-from .exceptions import ArgumentExpectedException, TemplateNotFoundException
-from . import logging as __logging
+from markdown_subtemplate.caching import cache
+from markdown_subtemplate.infrastructure import markdown_transformer
+from markdown_subtemplate.exceptions import ArgumentExpectedException, TemplateNotFoundException
+from markdown_subtemplate import logging as __logging
 
-CacheEntry = namedtuple("CacheEntry", "name, data, created, contents")
-__cache_markdown: Dict[str, CacheEntry] = {}
-__cache_html: Dict[str, CacheEntry] = {}
+# __cache_markdown: Dict[str, CacheEntry] = {}
+# __cache_html: Dict[str, CacheEntry] = {}
 
 template_folder: Optional[str] = None
 
@@ -19,9 +18,8 @@ def get_page(template_path: str, data: Dict[str, Any]) -> str:
     log = __logging.log
 
     key = f'name: {template_path}, data: {data}'
-    if key in __cache_html:
+    if entry := cache.get_html(key):
         log.trace(f"CACHE HIT: Reusing {template_path} from HTML cache.")
-        entry: CacheEntry = __cache_html[key]
         return entry.contents
 
     t0 = datetime.datetime.now()
@@ -31,8 +29,7 @@ def get_page(template_path: str, data: Dict[str, Any]) -> str:
     # Convert markdown to HTML
     html = get_html(markdown)
 
-    entry = CacheEntry(f"{template_path}:{key}", str(data), datetime.datetime.now(), html)
-    __cache_html[key] = entry
+    cache.add_html(key, key, str(data), html)
 
     dt = datetime.datetime.now() - t0
 
@@ -50,17 +47,14 @@ def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
     log = __logging.log
 
     key = f'name: {template_path}, data: {data}'
-    if key in __cache_markdown:
+    if entry := cache.get_markdown(key):
         log.trace(f"CACHE HIT: Reusing {template_path} from MARKDOWN cache.")
-        entry: CacheEntry = __cache_markdown[key]
         return entry.contents
 
     t0 = datetime.datetime.now()
 
     text = load_markdown_contents(template_path, data)
-
-    entry = CacheEntry(f"{template_path}:{key}", str(data), datetime.datetime.now(), text)
-    __cache_markdown[key] = entry
+    cache.add_markdown(key, key, str(data), text)
 
     dt = datetime.datetime.now() - t0
 
@@ -174,10 +168,3 @@ def process_variables(lines: List[str], data: Dict[str, Any]) -> List[str]:
             line_data[idx] = line.replace(key_placeholders[key], str(data[key]))
 
     return line_data
-
-
-def clear_cache(reclaim_all_memory=False):
-    __cache_markdown.clear()
-    __cache_html.clear()
-    if reclaim_all_memory:
-        markdown_transformer.clear_cache()
