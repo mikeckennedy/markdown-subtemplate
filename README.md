@@ -140,7 +140,7 @@ The resulting markdown is just replacing the `IMPORT` statements with the conten
 ```markdown
 # Example: $TITLE$
 
-Welcome to the $NAME$ project. Here are some details 
+Welcome to the $PROJECT$ project. Here are some details 
 ...
 ```
 
