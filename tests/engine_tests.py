@@ -22,3 +22,7 @@ def test_init_folder_missing():
 
 def test_init_folder_success():
     engine.set_template_folder(template_folder)
+
+
+def test_clear_cache():
+    engine.clear_cache(True)

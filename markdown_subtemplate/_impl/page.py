@@ -133,7 +133,11 @@ def process_imports(lines: List[str]) -> List[str]:
 def process_variables(lines: List[str], data: Dict[str, Any]) -> List[str]:
     line_data = list(lines)
     keys = list(data.keys())
-    key_placeholders = {key: f"${key}$" for key in keys}
+    key_placeholders = {
+        key: f"${key.strip().upper()}$"
+        for key in keys
+        if key and isinstance(key, str)
+    }
 
     for idx, line in enumerate(line_data):
         for key in keys:
