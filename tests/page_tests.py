@@ -165,7 +165,6 @@ And more inline **content**.
 def test_html_with_replacement():
     template = os.path.join('home', 'replacements_import.md')
     html = engine.get_page(template, {'Title': 'Best Title Ever!', 'link': 'https://training.talkpython.fm'})
-    print("HTML", html)
 
     text = '''
 <h1>This page imports things with data.</h1>
@@ -177,6 +176,32 @@ def test_html_with_replacement():
 <p>And more content with the word TITLE.</p>
 
 <p>And more inline <strong>content</strong>.</p>
+'''.strip()
+    assert text == html.strip()
+
+
+def test_html_with_embedded_html():
+    template = os.path.join('home', 'markdown_with_html.md')
+    html = engine.get_page(template, {})
+
+    text = '''
+<h1>This is the basic title</h1>
+
+<p>We have a paragraph with <a href="https://talkpython.fm">a link</a>.</p>
+
+<ul>
+<li>Bullet 1</li>
+<li>Bullet 2</li>
+<li>Bullet 3</li>
+</ul>
+
+<p>We also have an image with some details:</p>
+
+<p><a href="http://www.lolcats.com" target="_blank"><img 
+class="img img-responsive"
+src="http://www.lolcats.com/images/u/11/45/lolcatsdotcom3gp6wm7dw3jihq9t.jpg"></a></p>
+
+<p>End of the message.</p>
 '''.strip()
     assert text == html.strip()
 
