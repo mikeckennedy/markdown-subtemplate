@@ -65,7 +65,7 @@ def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
     dt = datetime.datetime.now() - t0
 
     msg = f"Created contents for {template_path}:{data} in {int(dt.total_seconds() * 1000):,} ms."
-    log.info(f"GENERATING MARKDOWN: {msg}")
+    log.trace(f"GENERATING MARKDOWN: {msg}")
 
     return text
 
