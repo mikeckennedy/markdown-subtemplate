@@ -1,4 +1,4 @@
-# markdown-subtemplate [![](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-3610/) [![](https://raw.githubusercontent.com/mikeckennedy/markdown-subtemplate/master/readme_resources/mitlicense.svg)](https://github.com/mikeckennedy/markdown-subtemplate/blob/master/LICENSE)
+# markdown-subtemplate [![](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-3610/) [![](https://img.shields.io/github/license/ResidentMario/missingno.svg)](https://github.com/ResidentMario/missingno/blob/master/LICENSE.md)
 
 A template engine to render Markdown with external template imports and basic variable replacements.
 
