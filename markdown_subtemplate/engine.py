@@ -49,12 +49,14 @@ def get_page(template_path: str, data: Dict[str, Any] = {}) -> str:
     return __page.get_page(template_path, data)
 
 
-def clear_cache(reclaim_all_memory=False):
+def clear_cache():
     log = __logging.get_log()
-    log.info(f"engine.clear_cache: Cache cleared, reclaim_all_memory={reclaim_all_memory}.")
-
     cache = __caching.get_cache()
+
+    item_count = cache.count()
     cache.clear()
+
+    log.info(f"engine.clear_cache: Cache cleared, reclaimed {item_count:,} items.")
 
 
 def clear_template_folder():
