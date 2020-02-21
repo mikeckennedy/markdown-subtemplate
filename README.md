@@ -17,6 +17,12 @@ Here's how it works:
 5. Markdown content is converted to HTML and embedded in your larger site layout (e.g. within a Jinja2 template).
 6. Markdown transforms are cached to achieve very high performance regardless of the complexity of the content.
 
+## Standard workflow
+
+Write markdown content, merge it with other markdown files, deliver it as HTML as part of your larger site.
+
+![](readme_resources/workflow_image_layout.png)
+
 ## Usage
 
 To use the library, simply install it. Then:
