@@ -2,12 +2,11 @@ import os
 import datetime
 from typing import Dict, Optional, Any, List
 
-from markdown_subtemplate import caching as __caching
+from markdown_subtemplate import caching as __caching, storage
 from markdown_subtemplate.infrastructure import markdown_transformer
 from markdown_subtemplate.exceptions import ArgumentExpectedException, TemplateNotFoundException
 from markdown_subtemplate import logging as __logging
-
-template_folder: Optional[str] = None
+from markdown_subtemplate.storage import SubtemplateStorage
 
 
 # noinspection DuplicatedCode
@@ -85,43 +84,16 @@ def get_page_markdown(template_path: str) -> Optional[str]:
     if not template_path or not template_path.strip():
         raise TemplateNotFoundException("No template file specified: template_path=''.")
 
-    file_name = os.path.basename(template_path)
-    file_parts = os.path.dirname(template_path).split(os.path.sep)
-    folder = get_folder(file_parts)
-    full_file = os.path.join(folder, file_name).lower()
-
-    if not os.path.exists(full_file):
-        raise TemplateNotFoundException(full_file)
-
-    with open(full_file, 'r', encoding='utf-8') as fin:
-        return fin.read()
-
-
-def get_folder(path_parts: List[str]) -> str:
-    if not path_parts:
-        raise ArgumentExpectedException('path_parts')
-
-    path_parts = [
-        p.strip().strip('/').strip('\\').lower()
-        for p in path_parts
-    ]
-    parent_folder = os.path.abspath(template_folder)
-    folder = os.path.join(parent_folder, *path_parts)
-    return folder
+    store: SubtemplateStorage = storage.get_storage()
+    return store.get_markdown_text(template_path)
 
 
 def get_shared_markdown(import_name: str) -> Optional[str]:
     if not import_name or not import_name.strip():
         raise ArgumentExpectedException('import_name')
 
-    folder = get_folder(['_shared'])
-    file = os.path.join(folder, import_name.strip().lower() + '.md')
-
-    if not os.path.exists(file):
-        raise TemplateNotFoundException(file)
-
-    with open(file, 'r', encoding='utf-8') as fin:
-        return fin.read()
+    store: SubtemplateStorage = storage.get_storage()
+    return store.get_shared_markdown(import_name)
 
 
 def process_imports(lines: List[str]) -> List[str]:

@@ -2,14 +2,14 @@ import os
 
 import pytest
 
-from markdown_subtemplate import engine, caching
+from markdown_subtemplate import engine, caching, storage
 from markdown_subtemplate import exceptions
 
 template_folder = os.path.join(os.path.dirname(__file__), 'templates')
 
 
 def test_init_folder_required():
-    engine.clear_template_folder()
+    storage.get_storage().clear_settings()
 
     with pytest.raises(exceptions.InvalidOperationException):
         engine.get_page('abc', {})
@@ -17,11 +17,11 @@ def test_init_folder_required():
 
 def test_init_folder_missing():
     with pytest.raises(exceptions.PathException):
-        engine.set_template_folder('bad/cats/')
+        storage.file_storage.FileStore.set_template_folder('bad/cats/')
 
 
 def test_init_folder_success():
-    engine.set_template_folder(template_folder)
+    storage.file_storage.FileStore.set_template_folder(template_folder)
 
 
 def test_clear_cache():

@@ -4,11 +4,11 @@ import pytest
 
 from markdown_subtemplate import exceptions
 from markdown_subtemplate import engine
-# noinspection PyProtectedMember
+from markdown_subtemplate.storage.file_storage import FileStore
 from markdown_subtemplate.infrastructure import page
 
-template_folder = os.path.join(os.path.dirname(__file__), 'templates')
-engine.set_template_folder(template_folder)
+FileStore.set_template_folder(
+    os.path.join(os.path.dirname(__file__), 'templates'))
 
 
 def test_missing_template_by_file():
