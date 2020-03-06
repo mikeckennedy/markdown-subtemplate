@@ -87,11 +87,16 @@ def get_markdown(template_path: str, data: Dict[str, Any] = None) -> str:
     return text
 
 
-def load_markdown_contents(template_path: str) -> str:
+def load_markdown_contents(template_path: str) -> Optional[str]:
+    if not template_path:
+        return None
+
     log = __logging.get_log()
     log.verbose(f"Loading markdown template: {template_path}")
 
     landing_md = get_page_markdown(template_path)
+    if not landing_md:
+        return None
 
     lines = landing_md.split('\n')
     lines = process_imports(lines)
