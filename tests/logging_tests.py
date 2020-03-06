@@ -26,4 +26,16 @@ def test_should_log_yes():
 
 def test_should_log_no():
     log = logging.get_log()
+    assert not log.should_log(LogLevel.verbose, "MSG")
     assert not log.should_log(LogLevel.trace, "MSG")
+
+
+def test_logging_off():
+    log = logging.get_log()
+    level = log.log_level
+    try:
+        log.log_level = LogLevel.off
+        assert not log.should_log(LogLevel.error, 'MSG')
+        assert not log.should_log(LogLevel.verbose, 'MSG')
+    finally:
+        log.log_level = level
