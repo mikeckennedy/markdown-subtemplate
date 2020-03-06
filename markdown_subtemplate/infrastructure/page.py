@@ -39,7 +39,7 @@ def get_page(template_path: str, data: Dict[str, Any]) -> str:
     # Convert markdown to HTML
     html = get_html(markdown)
 
-    cache.add_html(key, key, None, html)
+    cache.add_html(key, key, html)
     html = process_variables(html, data)
 
     dt = datetime.datetime.now() - t0

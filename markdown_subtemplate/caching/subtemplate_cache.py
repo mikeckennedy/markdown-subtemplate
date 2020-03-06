@@ -10,7 +10,7 @@ class SubtemplateCache(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def add_html(self, key: str, name: str, data: Optional[str], html_contents: str) -> CacheEntry:
+    def add_html(self, key: str, name: str, html_contents: str) -> CacheEntry:
         pass
 
     @abc.abstractmethod

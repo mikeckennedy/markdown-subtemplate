@@ -24,7 +24,7 @@ def transform(text, safe_mode=True):
         return entry.contents
 
     html = markdown2.markdown(text, extras=__enabled_markdown_extras, safe_mode=safe_mode)
-    cache.add_html(hash_val, f"markdown_transformer:{hash_val}", '', html)
+    cache.add_html(hash_val, f"markdown_transformer:{hash_val}", html)
 
     return html
 
