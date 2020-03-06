@@ -89,7 +89,7 @@ To allow for the greatest control, you can embed small fragments of HTML in the 
 
 `markdown-subtemplate` has three axis of extensibility:
 
-* **Storage** - Load markdown files from disk, db, or elsewhere.
+* **Storage** - Load markdown content from disk, db, or elsewhere.
 * **Caching** - Cache generated markdown and HTML in memory, DB, or you pick!
 * **Logging** - If you are using a logging framework, plug in logging messages from the library.
 
