@@ -110,9 +110,9 @@ By default, `markdown-subtemplate` will cache generated markdown and HTML in mem
 
 But web environments typically have many processes serving their content. For example, at [Talk Python Training](https://training.talkpython.fm/) we currently have 8-10 uWSGI worker processes running in parallel. 
 
-In this situation, caching all the content has a few drawbacks.
+In this situation, caching all the content in memory has a few drawbacks.
 * All content is cached in memory 10x what it would normally cost.
-* Content has to be generated which can be much slower 10x as often.
+* Content that has to be generated, which can be much slower, is done 10x as often.
 * Restarting the server for a new version of code requires everything to be regenerated 10x again making startup slow.
 * Clearing the cache, if wanted, is effectively impossible (how to you cleanly signal all 10 processes exactly once?)
 
@@ -332,5 +332,72 @@ caching.set_cache(cache)
 
 ## Logging
 
+By default, `markdown-subtemplate` will log to standard out using `print()` and log level `INFO` from the builtin `StdOutLogger` class. 
 
+You can change the log level by using the `markdown_subtemplate.logging.LogLevel` class:
 
+```python
+# Change logging level from default LogLevel.info to LogLevel.error
+
+log = logging.get_log()
+log.log_level == LogLevel.info
+```
+
+You can disable logging by setting it's level to `LogLevel.off`.
+
+If you use a logging framework, you likely want to direct log messages through that framework. So you can, like the above two subsystems, implement a class based on an abstract base class.
+
+Let's log through a preconfigured [Logbook](https://logbook.readthedocs.io/en/stable/) setup (which goes to stdout in dev and rotating files in prod).
+
+**First, create a base class**:
+
+```python
+import logbook
+import markdown_subtemplate
+from markdown_subtemplate.logging import LogLevel
+
+class MarkdownLogger(markdown_subtemplate.logging.SubtemplateLogger):
+    def __init__(self, log_level: int):
+        super().__init__(log_level)
+        self.logbook_logger = logbook.Logger("Markdown Templates")
+
+    def verbose(self, text: str):
+        if not self.should_log(LogLevel.verbose, text):
+            return
+
+        self.logbook_logger.trace(text)
+
+    def trace(self, text: str):
+        if not self.should_log(LogLevel.trace, text):
+            return
+
+        self.logbook_logger.trace(text)
+
+    def info(self, text: str):
+        if not self.should_log(LogLevel.info, text):
+            return
+
+        self.logbook_logger.info(text)
+
+    def error(self, text: str):
+        if not self.should_log(LogLevel.error, text):
+            return
+
+        self.logbook_logger.error(text)
+```
+
+That's pretty straightforward. But do be sure to check at each level whether you should log as we do with:
+
+```python
+if not self.should_log(LEVEL, text):
+    return
+```
+
+Finally, register this logging engine at process startup:
+
+```python
+From markdown_subtemplate import logging
+
+log = MarkdownLogger(LogLevel.info) # Set the level you want
+logging.set_log(log)
+```
