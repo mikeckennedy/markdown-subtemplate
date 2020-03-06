@@ -19,20 +19,28 @@ def get_page(template_path: str, data: Dict[str, Any]) -> str:
     cache = __caching.get_cache()
     log = __logging.get_log()
 
-    key = f'name: {template_path}, data: {data}'
+    key = f'html: {template_path}'
     entry = cache.get_html(key)
     if entry:
         log.trace(f"CACHE HIT: Reusing {template_path} from HTML cache.")
-        return entry.contents
+        contents = entry.contents
+
+        # Is there data that needs to be folded in? Process it.
+        if data:
+            contents = process_variables(contents, data)
+
+        # Return the cached data, no need to transform for variables.
+        return contents
 
     t0 = datetime.datetime.now()
 
     # Get the markdown with imports and substitutions
-    markdown = get_markdown(template_path, data)
+    markdown = get_markdown(template_path)
     # Convert markdown to HTML
     html = get_html(markdown)
 
-    cache.add_html(key, key, str(data), html)
+    cache.add_html(key, key, None, html)
+    html = process_variables(html, data)
 
     dt = datetime.datetime.now() - t0
 
@@ -48,7 +56,10 @@ def get_html(markdown_text: str, unsafe_data=False) -> str:
 
 
 # noinspection DuplicatedCode
-def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
+def get_markdown(template_path: str, data: Dict[str, Any] = None) -> str:
+    if data is None:
+        data = {}
+
     cache = __caching.get_cache()
     log = __logging.get_log()
 
@@ -65,17 +76,15 @@ def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
 
     text = load_markdown_contents(template_path)
     cache.add_markdown(key, key, text)
+    if data:
+        text = process_variables(text, data)
 
     dt = datetime.datetime.now() - t0
-
-    final_text = text
-    if data:
-        final_text = process_variables(text, data)
 
     msg = f"Created contents for {template_path} in {int(dt.total_seconds() * 1000):,} ms."
     log.trace(f"GENERATING MARKDOWN: {msg}")
 
-    return final_text
+    return text
 
 
 def load_markdown_contents(template_path: str) -> str:

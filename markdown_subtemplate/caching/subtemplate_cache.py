@@ -1,4 +1,6 @@
 import abc
+from typing import Optional
+
 from .cache_entry import CacheEntry
 
 
@@ -8,7 +10,7 @@ class SubtemplateCache(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def add_html(self, key: str, name: str, data: str, html_contents: str) -> CacheEntry:
+    def add_html(self, key: str, name: str, data: Optional[str], html_contents: str) -> CacheEntry:
         pass
 
     @abc.abstractmethod
