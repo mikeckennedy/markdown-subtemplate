@@ -16,9 +16,8 @@ TEMPLATE_FOLDER
    |- shared
        | - contact.md
        | - social.md
-   |- arbitrary-organizing-directories
-   |- home
-       | - index.md
+   |- home             # arbitrary organizing directories
+       | - index.md    # Use template_path: home/index.md
        | - about.md
 ```
 
