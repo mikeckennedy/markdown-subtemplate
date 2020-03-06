@@ -85,6 +85,16 @@ This library is meant for INTERNAL usage only. It's to help you add CMS features
 
 To allow for the greatest control, you can embed small fragments of HTML in the markdown (e.g. to add a CSS class or other actions). This means the markdown is processed in **UNSAFE** mode. It would allow for script injection attacks if opened to the public.
 
+## Extensibility
+
+`markdown-subtemplate` has three axis of extensibility:
+
+* **Storage** - Load markdown files from disk, db, or elsewhere.
+* **Caching** - Cache generated markdown and HTML in memory, DB, or you pick!
+* **Logging** - If you are using a logging framework, plug in logging messages from the library.
+
+See the [extensibility doc](extensibility.md) for details and examples.
+
 ## Installation
 
 Until we publish to PyPI, you'll need to install from Github using this command. We intend to make it available via PyPI, just want to finalize the API a little more first.
