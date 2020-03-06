@@ -29,7 +29,7 @@ folder = FULL_PATH_TO-TEMPLATE_FOLDER
 FileStore.set_template_folder(folder)
 ```
 
-If you want to configure the storage engine, just create a base class of `markdown_subtemplate.storage.SubtemplateStorage`. It's an abstract class so just implement the abstract methods.
+If you want to change the storage engine, just create a base class of `markdown_subtemplate.storage.SubtemplateStorage`. It's an abstract class so just implement the abstract methods.
 
 Here is an example from SQLAlchemy. Define a model to read/write data:
 
@@ -67,7 +67,7 @@ class MarkdownSubTemplateDBStorage(storage.SubtemplateStorage):
 
         return mk.text
 
-    def get_shared_markdown(self, import_name) -> Optional[str]:
+    def get_shared_markdown(self, import_name: str) -> Optional[str]:
         if not import_name:
             return None
 
@@ -105,6 +105,230 @@ storage.set_storage(store)
 ```
 
 ## Caching
+
+By default, `markdown-subtemplate` will cache generated markdown and HTML in memory. This often is fine.  If you do nothing, this will happen automatically and your page generation will be much faster if you reuse content or request it more than once.
+
+But web environments typically have many processes serving their content. For example, at [Talk Python Training](https://training.talkpython.fm/) we currently have 8-10 uWSGI worker processes running in parallel. 
+
+In this situation, caching all the content has a few drawbacks.
+* All content is cached in memory 10x what it would normally cost.
+* Content has to be generated which can be much slower 10x as often.
+* Restarting the server for a new version of code requires everything to be regenerated 10x again making startup slow.
+* Clearing the cache, if wanted, is effectively impossible (how to you cleanly signal all 10 processes exactly once?)
+
+In these situations, storing the cache content in a database or Redis would be better. At Talk Python, we use MongoDB as the backing cache store. 
+
+Below are two examples. They follow the pattern:
+
+1. Create an entity to store in the DB for cache data
+2. Create a base class of `markdown_subtemplate.caching.SubtemplateCache`
+3. Override the abstract methods
+4. Register your caching engine with `markdown-subtemplate` at startup.
+
+### SQLAlchemy Cachine Engine:
+
+**First, create the entity to store in the DB**.
+
+```python
+class MarkdownCache(SqlAlchemyBase):
+    __tablename__ = 'markdown_cache'
+
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    key = sa.Column(sa.String, index=True)
+    type = sa.Column(sa.String, index=True)
+    name = sa.Column(sa.String, index=True)
+    contents = sa.Column(sa.String)
+
+    created_date = sa.Column(sa.DateTime, default=datetime.datetime.now, index=True)
+```
+
+**Second, implement the caching engine**:
+
+```python
+from markdown_subtemplate import caching
+class MarkdownSubTemplateDBCache(caching.SubtemplateCache):
+    def get_html(self, key: str) -> caching.CacheEntry:
+        session = DbSession.create()
+
+        cache_entry = session.query(MarkdownCache).filter(
+            MarkdownCache.key == key, MarkdownCache.type == 'html'
+        ).first()
+
+        session.close()
+
+        return cache_entry
+
+    def add_html(self, key: str, name: str, html_contents: str) -> caching.CacheEntry:
+        session = DbSession.create()
+
+        item = self.get_html(key)
+        if not item:
+            item = MarkdownCache()
+            session.add(item)
+
+        item.type = 'html'
+        item.key = key
+        item.name = name
+        item.contents = html_contents
+
+        if html_contents:
+            session.commit()
+
+        session.close()
+
+        # Not technical a base class, but duck-type equivalent.
+        # noinspection PyTypeChecker
+        return item
+
+    def get_markdown(self, key: str) -> caching.CacheEntry:
+        session = DbSession.create()
+
+        cache_entry = session.query(MarkdownCache).filter(
+            MarkdownCache.key == key, MarkdownCache.type == 'markdown'
+        ).first()
+
+        session.close()
+
+        return cache_entry
+
+    def add_markdown(self, key: str, name: str, markdown_contents: str) -> caching.CacheEntry:
+        session = DbSession.create()
+
+        item = self.get_markdown(key)
+        if not item:
+            item = MarkdownCache()
+            session.add(item)
+
+        item.type = 'markdown'
+        item.key = key
+        item.name = name
+        item.contents = markdown_contents
+
+        if markdown_contents:
+            session.commit()
+        session.close()
+
+        # Not technical a base class, but duck-type equivalent.
+        # noinspection PyTypeChecker
+        return item
+
+    def clear(self):
+        session = DbSession.create()
+
+        for entry in session.query(MarkdownCache):
+            session.delete(entry)
+
+        session.commit()
+
+    def count(self) -> int:
+        session = DbSession.create()
+        count = session.query(MarkdownCache).count()
+        session.close()
+
+        return count
+```
+
+One minor oddity is the return value is `caching.CacheEntry` whereas that's not the real return value. But the SQLAlchemy entity does implement every field that is present in `CacheEntry`, so duck typing and all that.
+
+**Finally, register the new caching engine at process startup**.
+
+```python
+from markdown_subtemplate import caching
+
+cache = MarkdownSubTemplateDBCache()
+caching.set_cache(cache)
+```
+
+### MongoDB Cachine Engine:
+
+Using MongoDB as a backing store for the cache is basically the same as SQLAlchemy in principle. We'll be using MongoEngine.
+
+**First, create the entity to store in the DB**.
+
+```python
+import mongoengine as me
+
+class CmsCache(me.Document):
+    key: str = me.StringField(required=True)
+    type: str = me.StringField(required=True)
+    name: str = me.StringField()
+    contents: str = me.StringField(required=True)
+    created_date: datetime.datetime = me.DateTimeField(default=datetime.now)
+
+    meta = {
+        'db_alias': 'core',
+        'collection': 'cms_cache',
+        'indexes': [
+            {'fields': ['key', 'type']},
+            'key',
+            'type',
+            'name',
+            'created_date',
+        ],
+        'ordering': ['-created_date']
+    }
+```
+
+**Second, implement the caching engine**:
+
+```python
+class MarkdownSubTemplateMongoDBCache(SubtemplateCache):
+    def get_html(self, key: str) -> CacheEntry:
+        return CmsCache.objects(key=key, type='html').first()
+
+    def add_html(self, key: str, name: str, html_contents: str) -> CacheEntry:
+        item = self.get_html(key)
+        if item:
+            return item
+
+        item = CmsCache()
+        item.type = 'html'
+        item.key = key
+        item.name = name
+        item.contents = html_contents
+        item.save()
+
+        # Not technical a base class, but duck-type equivalent.
+        # noinspection PyTypeChecker
+        return item
+
+    def get_markdown(self, key: str) -> CacheEntry:
+        return CmsCache.objects(key=key, type='markdown').first()
+
+    def add_markdown(self, key: str, name: str, markdown_contents: str) -> CacheEntry:
+        item = self.get_markdown(key)
+        if item:
+            return item
+
+        item = CmsCache()
+        item.type = 'markdown'
+        item.key = key
+        item.name = name
+        item.contents = markdown_contents
+        item.save()
+
+        # Not technical a base class, but duck-type equivalent.
+        # noinspection PyTypeChecker
+        return item
+
+    def clear(self):
+        CmsCache.objects().delete()
+
+    def count(self) -> int:
+        return CmsCache.objects().count()
+```
+
+One minor oddity is the return value is `caching.CacheEntry` whereas that's not the real return value. But the MongoEngine entity does implement every field that is present in `CacheEntry`, so duck typing and all that.
+
+**Finally, register the new caching engine at process startup**.
+
+```python
+from markdown_subtemplate import caching
+
+cache = MarkdownSubTemplateMongoDBCache()
+caching.set_cache(cache)
+```
+
 
 ## Logging
 
