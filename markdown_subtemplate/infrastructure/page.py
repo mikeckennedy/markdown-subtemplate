@@ -11,6 +11,11 @@ from markdown_subtemplate.storage import SubtemplateStorage
 
 # noinspection DuplicatedCode
 def get_page(template_path: str, data: Dict[str, Any]) -> str:
+    if not template_path or not template_path.strip():
+        raise ArgumentExpectedException('template_path')
+
+    template_path = template_path.strip().lower()
+
     cache = __caching.get_cache()
     log = __logging.get_log()
 
@@ -38,7 +43,8 @@ def get_page(template_path: str, data: Dict[str, Any]) -> str:
 
 
 def get_html(markdown_text: str, unsafe_data=False) -> str:
-    return markdown_transformer.transform(markdown_text, unsafe_data)
+    html = markdown_transformer.transform(markdown_text, unsafe_data)
+    return html
 
 
 # noinspection DuplicatedCode
@@ -46,26 +52,33 @@ def get_markdown(template_path: str, data: Dict[str, Any]) -> str:
     cache = __caching.get_cache()
     log = __logging.get_log()
 
-    key = f'name: {template_path}, data: {data}'
+    key = f'markdown: {template_path}'
     entry = cache.get_markdown(key)
     if entry:
         log.trace(f"CACHE HIT: Reusing {template_path} from MARKDOWN cache.")
-        return entry.contents
+        if not data:
+            return entry.contents
+        else:
+            return process_variables(entry.contents, data)
 
     t0 = datetime.datetime.now()
 
-    text = load_markdown_contents(template_path, data)
-    cache.add_markdown(key, key, str(data), text)
+    text = load_markdown_contents(template_path)
+    cache.add_markdown(key, key, text)
 
     dt = datetime.datetime.now() - t0
 
-    msg = f"Created contents for {template_path}:{data} in {int(dt.total_seconds() * 1000):,} ms."
+    final_text = text
+    if data:
+        final_text = process_variables(text, data)
+
+    msg = f"Created contents for {template_path} in {int(dt.total_seconds() * 1000):,} ms."
     log.trace(f"GENERATING MARKDOWN: {msg}")
 
-    return text
+    return final_text
 
 
-def load_markdown_contents(template_path: str, data: Dict[str, Any]) -> str:
+def load_markdown_contents(template_path: str) -> str:
     log = __logging.get_log()
     log.verbose(f"Loading markdown template: {template_path}")
 
@@ -73,7 +86,6 @@ def load_markdown_contents(template_path: str, data: Dict[str, Any]) -> str:
 
     lines = landing_md.split('\n')
     lines = process_imports(lines)
-    lines = process_variables(lines, data)
 
     final_markdown = "\n".join(lines).strip()
 
@@ -122,10 +134,12 @@ def process_imports(lines: List[str]) -> List[str]:
     return line_data
 
 
-def process_variables(lines: List[str], data: Dict[str, Any]) -> List[str]:
+def process_variables(raw_text: str, data: Dict[str, Any]) -> str:
+    if not raw_text:
+        return raw_text
+
     log = __logging.get_log()
 
-    line_data = list(lines)
     keys = list(data.keys())
     key_placeholders = {
         key: f"${key.strip().upper()}$"
@@ -133,12 +147,12 @@ def process_variables(lines: List[str], data: Dict[str, Any]) -> List[str]:
         if key and isinstance(key, str)
     }
 
-    for idx, line in enumerate(line_data):
-        for key in keys:
-            if key_placeholders[key] not in line:
-                continue
+    transformed_text = raw_text
+    for key in keys:
+        if key_placeholders[key] not in transformed_text:
+            continue
 
-            log.verbose(f"Replacing {key_placeholders[key]} in:\n{line}")
-            line_data[idx] = line.replace(key_placeholders[key], str(data[key]))
+        log.verbose(f"Replacing {key_placeholders[key]}...")
+        transformed_text = transformed_text.replace(key_placeholders[key], str(data[key]))
 
-    return line_data
+    return transformed_text

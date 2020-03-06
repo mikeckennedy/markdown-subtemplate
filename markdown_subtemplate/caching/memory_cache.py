@@ -20,8 +20,8 @@ class MemoryCache(SubtemplateCache):
     def get_markdown(self, key: str) -> CacheEntry:
         return self.markdown_cache.get(key)
 
-    def add_markdown(self, key: str, name: str, data: str, markdown_contents: str) -> CacheEntry:
-        entry = CacheEntry(key=key, name=name, data=data, created=datetime.now(), contents=markdown_contents)
+    def add_markdown(self, key: str, name: str, markdown_contents: str) -> CacheEntry:
+        entry = CacheEntry(key=key, name=name, data=None, created=datetime.now(), contents=markdown_contents)
         self.markdown_cache[key] = entry
 
         return entry

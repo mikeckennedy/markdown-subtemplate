@@ -16,7 +16,7 @@ class SubtemplateCache(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def add_markdown(self, key: str, name: str, data: str, markdown_contents: str) -> CacheEntry:
+    def add_markdown(self, key: str, name: str, markdown_contents: str) -> CacheEntry:
         pass
 
     @abc.abstractmethod
