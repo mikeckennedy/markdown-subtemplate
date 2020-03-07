@@ -10,10 +10,10 @@ These are presented as an either-or. You either get a full database driven app o
 
 Here's how it works:
 
-1. You write standard markdown files for content.
-2. Markdown files can be shared and imported into your top-level markdown.
+1. You write standard markdown content.
+2. Markdown content can be shared and imported into your top-level markdown.
 3. Fragments of HTML can be used when css classes and other specializations are needed, but generally HTML is avoided.
-4. A dictionary of variables and their values to replace in the merged markdown is processes.
+4. A dictionary of variables and their values to replace in the merged markdown is processed.
 5. Markdown content is converted to HTML and embedded in your larger site layout (e.g. within a Jinja2 template).
 6. Markdown transforms are cached to achieve very high performance regardless of the complexity of the content.
 

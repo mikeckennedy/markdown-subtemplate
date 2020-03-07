@@ -340,10 +340,10 @@ You can change the log level by using the `markdown_subtemplate.logging.LogLevel
 # Change logging level from default LogLevel.info to LogLevel.error
 
 log = logging.get_log()
-log.log_level == LogLevel.info
+log.log_level = LogLevel.error
 ```
 
-You can disable logging by setting it's level to `LogLevel.off`.
+You can disable logging by setting its level to `LogLevel.off`.
 
 If you use a logging framework, you likely want to direct log messages through that framework. So you can, like the above two subsystems, implement a class based on an abstract base class.
 
