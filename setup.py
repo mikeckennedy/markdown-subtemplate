@@ -47,6 +47,7 @@ setup(
 
     description="A template engine to render Markdown with external template imports and variable replacements.",
     long_description=read("README.md"),
+    long_description_content_type='text/markdown',
 
     packages=find_packages(exclude=('tests',)),
 
