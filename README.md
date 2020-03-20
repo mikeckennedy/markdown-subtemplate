@@ -21,7 +21,7 @@ Here's how it works:
 
 Write markdown content, merge it with other markdown files, deliver it as HTML as part of your larger site.
 
-![](readme_resources/workflow_image_layout.png)
+![](https://raw.githubusercontent.com/mikeckennedy/markdown-subtemplate/master/readme_resources/workflow_image_layout.png)
 
 ## Usage
 
@@ -93,7 +93,7 @@ To allow for the greatest control, you can embed small fragments of HTML in the 
 * **Caching** - Cache generated markdown and HTML in memory, DB, or you pick!
 * **Logging** - If you are using a logging framework, plug in logging messages from the library.
 
-See the [extensibility doc](extensibility.md) for details and examples.
+See the [extensibility doc](https://github.com/mikeckennedy/markdown-subtemplate/blob/master/extensibility.md) for details and examples.
 
 ## Installation
 
