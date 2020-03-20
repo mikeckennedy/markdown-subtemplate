@@ -32,7 +32,7 @@ with open(requirements_txt, 'r', encoding='utf-8') as fin:
     requires = [
         line.strip()
         for line in fin
-        if line and line.strip()
+        if line and line.strip() and not line.strip().startswith('#')
     ]
 
 
