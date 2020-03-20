@@ -1,6 +1,6 @@
 # markdown-subtemplate 
 [![](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/) 
-[![](https://img.shields.io/github/license/ResidentMario/missingno.svg)](https://github.com/mikeckennedy/markdown-subtemplate/blob/master/LICENSE)
+[![](https://img.shields.io/pypi/l/markdown-subtemplate.svg)](https://github.com/mikeckennedy/markdown-subtemplate/blob/master/LICENSE)
 [![](https://img.shields.io/pypi/dm/markdown-subtemplate.svg)](https://pypi.org/project/markdown-subtemplate/)
 
 A template engine to render Markdown with external template imports and basic variable replacements.
