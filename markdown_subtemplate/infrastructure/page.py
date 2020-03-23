@@ -2,10 +2,11 @@ import os
 import datetime
 from typing import Dict, Optional, Any, List
 
-from markdown_subtemplate import caching as __caching, storage
+from markdown_subtemplate import caching as __caching
 from markdown_subtemplate.infrastructure import markdown_transformer
 from markdown_subtemplate.exceptions import ArgumentExpectedException, TemplateNotFoundException
 from markdown_subtemplate import logging as __logging
+import markdown_subtemplate.storage as __storage
 from markdown_subtemplate.storage import SubtemplateStorage
 
 
@@ -110,7 +111,7 @@ def get_page_markdown(template_path: str) -> Optional[str]:
     if not template_path or not template_path.strip():
         raise TemplateNotFoundException("No template file specified: template_path=''.")
 
-    store: SubtemplateStorage = storage.get_storage()
+    store: SubtemplateStorage = __storage.get_storage()
     return store.get_markdown_text(template_path)
 
 
@@ -118,7 +119,7 @@ def get_shared_markdown(import_name: str) -> Optional[str]:
     if not import_name or not import_name.strip():
         raise ArgumentExpectedException('import_name')
 
-    store: SubtemplateStorage = storage.get_storage()
+    store: SubtemplateStorage = __storage.get_storage()
     return store.get_shared_markdown(import_name)
 
 
@@ -136,11 +137,14 @@ def process_imports(lines: List[str]) -> List[str]:
             .replace(']', '') \
             .strip()
 
-        imported_file = os.path.join('_shared', import_name + '.md')
-        log.verbose(f"Loading import: {imported_file}...")
+        log.verbose(f"Loading import: {import_name}...")
 
-        markdown = get_page_markdown(imported_file)
-        markdown_lines = markdown.split('\n')
+        markdown = get_shared_markdown(import_name)
+        if markdown is not None:
+            markdown_lines = markdown.split('\n')
+        else:
+            markdown_lines = ['', f'ERROR: IMPORT {import_name} not found', '']
+
         line_data = line_data[:idx] + markdown_lines + line_data[idx + 1:]
 
         return process_imports(line_data)
