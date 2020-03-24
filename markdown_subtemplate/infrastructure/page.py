@@ -95,11 +95,11 @@ def load_markdown_contents(template_path: str) -> Optional[str]:
     log = __logging.get_log()
     log.verbose(f"Loading markdown template: {template_path}")
 
-    landing_md = get_page_markdown(template_path)
-    if not landing_md:
+    page_md = get_page_markdown(template_path)
+    if not page_md:
         return ''
 
-    lines = landing_md.split('\n')
+    lines = page_md.split('\n')
     lines = process_imports(lines)
 
     final_markdown = "\n".join(lines).strip()
