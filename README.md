@@ -101,16 +101,6 @@ To allow for the greatest control, you can embed small fragments of HTML in the 
 * **Logging** - If you are using a logging framework, plug in logging messages from the library.
 
 See the [extensibility doc](https://github.com/mikeckennedy/markdown-subtemplate/blob/master/extensibility.md) for details and examples.
-
-## Installation
-
-Until we publish to PyPI, you'll need to install from Github using this command. We intend to make it available via PyPI, just want to finalize the API a little more first.
-
-Install:
-
-```bash
-pip install git+git://github.com/mikeckennedy/markdown-subtemplate
-```
  
  
 ## Nested markdown
