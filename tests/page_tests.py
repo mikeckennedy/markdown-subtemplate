@@ -2,10 +2,10 @@ import os
 
 import pytest
 
-from markdown_subtemplate import exceptions
 from markdown_subtemplate import engine
-from markdown_subtemplate.storage.file_storage import FileStore
+from markdown_subtemplate import exceptions
 from markdown_subtemplate.infrastructure import page
+from markdown_subtemplate.storage.file_storage import FileStore
 
 FileStore.set_template_folder(
     os.path.join(os.path.dirname(__file__), 'templates'))
@@ -46,7 +46,6 @@ We have a paragraph with [a link](https://talkpython.fm).
 def test_basic_markdown_html():
     template = os.path.join('home', 'basic_markdown.md')
     html = engine.get_page(template, {'a': 1, 'b': 2})
-    print("HTML", html)
 
     text = '''
 <h1>This is the basic title</h1>
@@ -149,19 +148,19 @@ And more inline **content**.
 
 def test_variable_definition_markdown():
     template = os.path.join('home', 'variables.md')
-    md = page.get_markdown(template, {})
+    html = page.get_page(template, {})
 
     text = '''
-# This page defines a variable.
+<h1>This page defines a variable.</h1>
 
-We have a paragraph with [a link](https://talkpython.fm).
+<p>We have a paragraph with <a href="https://talkpython.fm">a link</a>.</p>
 
-### This page had a title set: Variables rule!
+<h3>This page had a title set: Variables rule!</h3>
 
-And more content with the word Variables rule!.
-
+<p>And more content with the word TITLE.</p>
 '''.strip()
-    assert text == md.strip()
+
+    assert text == html.strip()
 
 
 def test_no_lowercase_replacements_markdown():
