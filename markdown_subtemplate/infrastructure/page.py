@@ -7,6 +7,7 @@ from markdown_subtemplate.infrastructure import markdown_transformer
 from markdown_subtemplate.exceptions import ArgumentExpectedException, TemplateNotFoundException
 from markdown_subtemplate import logging as __logging
 import markdown_subtemplate.storage as __storage
+from markdown_subtemplate.logging import SubtemplateLogger
 from markdown_subtemplate.storage import SubtemplateStorage
 
 
@@ -37,11 +38,14 @@ def get_page(template_path: str, data: Dict[str, Any]) -> str:
 
     # Get the markdown with imports and substitutions
     markdown = get_markdown(template_path)
+    inline_variables = {}
+    markdown = get_inline_variables(markdown, inline_variables, log)
     # Convert markdown to HTML
     html = get_html(markdown)
 
     cache.add_html(key, key, html)
-    html = process_variables(html, data)
+    full_data = {**data, **inline_variables}
+    html = process_variables(html, full_data)
 
     dt = datetime.datetime.now() - t0
 
@@ -174,3 +178,42 @@ def process_variables(raw_text: str, data: Dict[str, Any]) -> str:
         transformed_text = transformed_text.replace(key_placeholders[key], str(data[key]))
 
     return transformed_text
+
+
+def get_inline_variables(markdown: str, new_vars: Dict[str, str], log: SubtemplateLogger) -> str:
+    lines: List[str] = markdown.split('\n')
+    pattern = '[VARIABLE '
+
+    final_lines = []
+
+    for l in lines:
+
+        if not( l and l.upper().startswith(pattern)):
+            final_lines.append(l)
+            continue
+
+        text = l[len(pattern):].strip("]")
+        parts = text.split('=')
+        if len(parts) != 2:
+            log.error(f"Invalid variable definition in markdown: {l}.")
+            continue
+
+        name = parts[0].strip().upper()
+        value = parts[1].strip()
+        has_quotes = (
+            (value.startswith('"') or value.startswith("'")) and
+            (value.endswith('"') or value.endswith("'"))
+        )
+
+        if not has_quotes:
+            log.error(f"Invalid variable definition in markdown, missing quotes surrounding value: {l}.")
+            continue
+
+        value = value.strip('\'"').strip()
+
+        new_vars[name]=value
+
+    if new_vars:
+        return "\n".join(final_lines)
+    else:
+        return markdown

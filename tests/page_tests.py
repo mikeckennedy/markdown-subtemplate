@@ -2,10 +2,10 @@ import os
 
 import pytest
 
-from markdown_subtemplate import exceptions
 from markdown_subtemplate import engine
-from markdown_subtemplate.storage.file_storage import FileStore
+from markdown_subtemplate import exceptions
 from markdown_subtemplate.infrastructure import page
+from markdown_subtemplate.storage.file_storage import FileStore
 
 FileStore.set_template_folder(
     os.path.join(os.path.dirname(__file__), 'templates'))
@@ -46,7 +46,6 @@ We have a paragraph with [a link](https://talkpython.fm).
 def test_basic_markdown_html():
     template = os.path.join('home', 'basic_markdown.md')
     html = engine.get_page(template, {'a': 1, 'b': 2})
-    print("HTML", html)
 
     text = '''
 <h1>This is the basic title</h1>
@@ -145,6 +144,23 @@ You'll see imported things.
 And more inline **content**.
 '''.strip()
     assert text == md.strip()
+
+
+def test_variable_definition_markdown():
+    template = os.path.join('home', 'variables.md')
+    html = page.get_page(template, {})
+
+    text = '''
+<h1>This page defines a variable.</h1>
+
+<p>We have a paragraph with <a href="https://talkpython.fm">a link</a>.</p>
+
+<h3>This page had a title set: Variables rule!</h3>
+
+<p>And more content with the word TITLE.</p>
+'''.strip()
+
+    assert text == html.strip()
 
 
 def test_no_lowercase_replacements_markdown():
