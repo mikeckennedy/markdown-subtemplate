@@ -88,7 +88,7 @@ And the larger website template grabs the content and renders it, `landing.pt`:
 
 ## Beware the danger!
 
-This library is meant for INTERNAL usage only. It's to help you add CMS features to your app. It is **not** for taking user input and making an forum or something like that.
+This library is meant for INTERNAL usage only. It's to help you add CMS features to your app. It is **not** for taking user input and making a forum or something like that.
 
 To allow for the greatest control, you can embed small fragments of HTML in the markdown (e.g. to add a CSS class or other actions). This means the markdown is processed in **UNSAFE** mode. It would allow for script injection attacks if opened to the public.
 
