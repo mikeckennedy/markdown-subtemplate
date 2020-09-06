@@ -147,6 +147,23 @@ And more inline **content**.
     assert text == md.strip()
 
 
+def test_variable_definition_markdown():
+    template = os.path.join('home', 'variables.md')
+    md = page.get_markdown(template, {})
+
+    text = '''
+# This page defines a variable.
+
+We have a paragraph with [a link](https://talkpython.fm).
+
+### This page had a title set: Variables rule!
+
+And more content with the word Variables rule!.
+
+'''.strip()
+    assert text == md.strip()
+
+
 def test_no_lowercase_replacements_markdown():
     template = os.path.join('home', 'replacements_case_error.md')
     md = page.get_markdown(template, {'title': 'the title', 'link': 'The link'})
