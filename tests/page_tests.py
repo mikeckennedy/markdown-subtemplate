@@ -146,7 +146,7 @@ And more inline **content**.
     assert text == md.strip()
 
 
-def test_variable_definition_markdown():
+def test_variable_definition_html():
     template = os.path.join('home', 'variables.md')
     html = page.get_page(template, {})
 
@@ -159,6 +159,33 @@ def test_variable_definition_markdown():
 
 <p>And more content with the word TITLE.</p>
 '''.strip()
+
+    assert text == html.strip()
+
+
+def test_variable_definition_html_cached():
+    template = os.path.join('home', 'variables.md')
+
+    # for some reason, the cached version doesn't include the local variables
+    # let's call it twice and see if we can catch it and guard against it.
+    page.get_page(template, {})
+    html = page.get_page(template, {})
+
+    text = '''
+<h1>This page defines a variable.</h1>
+
+<p>We have a paragraph with <a href="https://talkpython.fm">a link</a>.</p>
+
+<h3>This page had a title set: Variables rule!</h3>
+
+<p>And more content with the word TITLE.</p>
+'''.strip()
+
+    print("HTML: ")
+    print(html)
+    print("TEST: ")
+    print(text)
+    print(flush=True)
 
     assert text == html.strip()
 
@@ -227,3 +254,34 @@ def test_missing_import_markdown():
     template = os.path.join('home', 'import_missing.md')
     with pytest.raises(exceptions.TemplateNotFoundException):
         page.get_markdown(template, {'a': 1, 'b': 2})
+
+
+def test_pull_inline_variables():
+    md = """
+    # Title
+    
+    [variable var1="abc"]
+    [variable var2="xyz"]
+    
+    Ending
+    """
+    vars = {}
+    page.get_inline_variables(md, vars, None)
+
+    assert {"VAR1": "abc", "VAR2": "xyz"} == vars
+
+
+def test_no_inline_variables():
+    md = """
+    # Title
+    
+    - a
+    - b
+    - c
+    
+    Ending
+    """
+    vars = {}
+    page.get_inline_variables(md, vars, None)
+
+    assert {} == vars

@@ -43,9 +43,12 @@ def get_page(template_path: str, data: Dict[str, Any]) -> str:
     # Convert markdown to HTML
     html = get_html(markdown)
 
+    # Cache inline variables, but not the passed in data as that varies per request (query string, etc).
+    html = process_variables(html, inline_variables)
     cache.add_html(key, key, html)
-    full_data = {**data, **inline_variables}
-    html = process_variables(html, full_data)
+
+    # Replace the passed variables each time.
+    html = process_variables(html, data)
 
     dt = datetime.datetime.now() - t0
 
@@ -180,22 +183,27 @@ def process_variables(raw_text: str, data: Dict[str, Any]) -> str:
     return transformed_text
 
 
-def get_inline_variables(markdown: str, new_vars: Dict[str, str], log: SubtemplateLogger) -> str:
-    lines: List[str] = markdown.split('\n')
+def get_inline_variables(markdown: str, new_vars: Dict[str, str], log: Optional[SubtemplateLogger]) -> str:
     pattern = '[VARIABLE '
 
+    if pattern not in markdown and pattern.lower() not in markdown:
+        return markdown
+
+    lines: List[str] = markdown.split('\n')
     final_lines = []
 
     for l in lines:
 
-        if not( l and l.upper().startswith(pattern)):
+        if not( l and l.strip().upper().startswith(pattern)):
             final_lines.append(l)
             continue
 
-        text = l[len(pattern):].strip("]")
+        text = l.strip()
+        text = text[len(pattern):].strip("]")
         parts = text.split('=')
         if len(parts) != 2:
-            log.error(f"Invalid variable definition in markdown: {l}.")
+            if log:
+                log.error(f"Invalid variable definition in markdown: {l}.")
             continue
 
         name = parts[0].strip().upper()
@@ -206,7 +214,8 @@ def get_inline_variables(markdown: str, new_vars: Dict[str, str], log: Subtempla
         )
 
         if not has_quotes:
-            log.error(f"Invalid variable definition in markdown, missing quotes surrounding value: {l}.")
+            if log:
+                log.error(f"Invalid variable definition in markdown, missing quotes surrounding value: {l}.")
             continue
 
         value = value.strip('\'"').strip()
