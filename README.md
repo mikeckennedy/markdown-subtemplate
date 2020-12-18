@@ -166,6 +166,57 @@ contents = engine.get_page('page.md', data)
 
 Note that the variable names must be all-caps in the template. Missing variable statements in markdown that appear in the data dictionary are ignored.
 
+## Variables within nested templates
+
+One problem you might run into is you some reusable section, like this:
+
+```
+// shared_promo.md
+
+We are running a special! Click here to see the featured item:
+
+[Our latest project, 50% off](/markdown-editor?utm_source={SOMETHING_FROM_THE_PAGE})
+```
+
+It's generally reusable, but you want that `SOMETHING_FROM_THE_PAGE` to vary depending on which page they are on. 
+You could do this in Python code but that would be out of band and actually a little hard to do. So you can
+now define hierarchical variables in markdown. 
+
+Define nested variables as follows with `name=VARNAME` and `value=var-value`:
+
+```
+[VARIABLE VARNAME="var-value"]
+```
+
+In the following page, we choose a `source` and reuse this shared template:
+
+```
+// top-level.md
+
+# Welcome to the page
+
+Page content here...
+
+[VARIABLE SOMETHING_FROM_THE_PAGE="editor-youtube-landing-page"]
+[IMPORT shared_promo]
+```
+
+The result would be effective this markdown, then turned into HTML:
+
+```markdown
+# Welcome to the page
+
+Page content here...
+
+We are running a special! Click here to see the featured item:
+
+[Our latest project, 50% off](/markdown-editor?utm_source=editor-youtube-landing-page)
+```
+
+Just like regular variables, they are enclosed in `{` and `}` and are upper case where they are used.
+
+
+
 ## Requirements
 
 This library requires **Python 3.6 or higher**. Because, *f-yes*! (f-strings).
