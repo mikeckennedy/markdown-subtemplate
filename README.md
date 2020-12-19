@@ -168,7 +168,7 @@ Note that the variable names must be all-caps in the template. Missing variable 
 
 ## Variables within nested templates
 
-One problem you might run into is you some reusable section, like this:
+One problem you might run into is you have some reusable section, like this:
 
 ```
 // shared_promo.md
